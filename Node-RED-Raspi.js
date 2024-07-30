@@ -925,7 +925,7 @@
         "type": "debug",
         "z": "8e30d240404d539c",
         "name": "debug 75",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2546,9 +2546,9 @@
         "id": "a65641852f421a31",
         "type": "mysql",
         "z": "8e30d240404d539c",
-        "mydb": "717172851b6a3e6f",
+        "mydb": "",
         "name": "",
-        "x": 3675,
+        "x": 3595,
         "y": 1585,
         "wires": [
             []
@@ -3866,8 +3866,7 @@
         "port": "3307",
         "db": "database_tps_energy",
         "tz": "",
-        "charset": "UTF8",
-        "credentials": {}
+        "charset": "UTF8"
     },
     {
         "id": "7411ac616e5fc7a3",
@@ -3896,16 +3895,6 @@
         "host": "127.0.0.1",
         "port": "3307",
         "db": "database_tps_oee_iam_72",
-        "tz": "",
-        "charset": "UTF8"
-    },
-    {
-        "id": "717172851b6a3e6f",
-        "type": "MySQLdatabase",
-        "name": "",
-        "host": "127.0.0.1",
-        "port": "3306",
-        "db": "database_tps_andon_oee_roller",
         "tz": "",
         "charset": "UTF8"
     }
