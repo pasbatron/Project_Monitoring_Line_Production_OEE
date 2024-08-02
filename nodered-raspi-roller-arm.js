@@ -1,8 +1,8 @@
 [
     {
-        "id": "2c66d364e20da372",
+        "id": "9d38e8986ae1c85e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration mc_fault",
         "func": "// Initialize context variables if not already set\nif (!context.startTime) {\n    context.startTime = null;\n}\nif (!context.stopTime) {\n    context.stopTime = null;\n}\nif (!context.pauseTime) {\n    context.pauseTime = null;\n}\nif (!context.duration) {\n    context.duration = 0;\n}\nif (!context.pausedDuration) {\n    context.pausedDuration = 0;\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.pauseTime) {\n        // Resuming from pause\n        context.pausedDuration += (new Date() - context.pauseTime);\n        context.pauseTime = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.startTime = new Date();\n        context.stopTime = null;\n        context.duration = 0; // Reset duration on start\n        context.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.startTime) {\n        context.stopTime = new Date();\n        context.duration = (context.stopTime - context.startTime - context.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.startTime && !context.pauseTime) {\n        context.pauseTime = new Date();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.startTime = null;\n    context.stopTime = null;\n    context.pauseTime = null;\n    context.duration = 0;\n    context.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -10,56 +10,58 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 895,
-        "y": 420,
+        "x": 855,
+        "y": 405,
         "wires": [
             [
-                "52400b9f73abc870"
+                "d4f046e54867ab5e"
             ]
         ]
     },
     {
-        "id": "513af497eb3cba08",
+        "id": "942fc5dab40550af",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration quality_check",
         "func": "// Initialize context variables if not already set\nif (!context.state) {\n    context.state = {\n        startTime: null,\n        stopTime: null,\n        pauseTime: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nswitch (action) {\n    case \"start\":\n        if (context.state.pauseTime) {\n            // Resuming from pause\n            context.state.pausedDuration += (new Date() - context.state.pauseTime);\n            context.state.pauseTime = null;\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n        } else {\n            // Starting new\n            context.state.startTime = new Date();\n            context.state.stopTime = null;\n            context.state.duration = 0; // Reset duration on start\n            context.state.pausedDuration = 0; // Reset paused duration on start\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n        }\n        break;\n    \n    case \"stop\":\n        if (context.state.startTime) {\n            context.state.stopTime = new Date();\n            context.state.duration = (context.state.stopTime - context.state.startTime - context.state.pausedDuration) / 1000; // Calculate duration in seconds\n            msg.payload = { duration: context.state.duration };\n            node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.state.duration} sec` });\n            return msg; // Send message with the duration\n        }\n        break;\n    \n    case \"pause\":\n        if (context.state.startTime && !context.state.pauseTime) {\n            context.state.pauseTime = new Date();\n            node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n        }\n        break;\n    \n    case \"reset\":\n        context.state.startTime = null;\n        context.state.stopTime = null;\n        context.state.pauseTime = null;\n        context.state.duration = 0;\n        context.state.pausedDuration = 0;\n        node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n        break;\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 1,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 915,
-        "y": 480,
+        "x": 875,
+        "y": 465,
         "wires": [
             [
-                "6ae9074a8b15e781"
+                "49857a2888c71862"
             ]
         ]
     },
     {
-        "id": "fc0be66fed12a742",
+        "id": "62b8fde44c9c70c3",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration tool_change",
         "func": "// Initialize context variables if not already set\nif (!context.timer) {\n    context.timer = {\n        startTime: null,\n        stopTime: null,\n        pauseTime: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.timer.pauseTime) {\n        // Resuming from pause\n        context.timer.pausedDuration += (new Date() - context.timer.pauseTime);\n        context.timer.pauseTime = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.timer.startTime = new Date();\n        context.timer.stopTime = null;\n        context.timer.duration = 0; // Reset duration on start\n        context.timer.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.timer.startTime) {\n        context.timer.stopTime = new Date();\n        context.timer.duration = (context.timer.stopTime - context.timer.startTime - context.timer.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.timer.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.timer.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.timer.startTime && !context.timer.pauseTime) {\n        context.timer.pauseTime = new Date();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.timer.startTime = null;\n    context.timer.stopTime = null;\n    context.timer.pauseTime = null;\n    context.timer.duration = 0;\n    context.timer.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 905,
-        "y": 540,
+        "x": 865,
+        "y": 525,
         "wires": [
             [
-                "3d4c4cbfbb0d14fb"
+                "2d48e55c6fc190ae"
             ]
         ]
     },
     {
-        "id": "4616888ee492e119",
+        "id": "8b8f91896ec14c8e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration arm_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.time) {\n    context.time = {\n        start: null,\n        stop: null,\n        pause: null,\n        diff: 0,\n        pausedDiff: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.time.pause) {\n        // Resuming from pause\n        context.time.pausedDiff += (new Date().getTime() - context.time.pause);\n        context.time.pause = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.time.start = new Date().getTime();\n        context.time.stop = null;\n        context.time.diff = 0; // Reset diff on start\n        context.time.pausedDiff = 0; // Reset paused diff on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.time.start) {\n        context.time.stop = new Date().getTime();\n        context.time.diff = (context.time.stop - context.time.start - context.time.pausedDiff) / 1000; // Calculate diff in seconds\n        msg.payload = { duration: context.time.diff };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.time.diff} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.time.start && !context.time.pause) {\n        context.time.pause = new Date().getTime();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.time.start = null;\n    context.time.stop = null;\n    context.time.pause = null;\n    context.time.diff = 0;\n    context.time.pausedDiff = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -67,37 +69,38 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 905,
-        "y": 600,
+        "x": 865,
+        "y": 585,
         "wires": [
             [
-                "3077a31b1b8f67dc"
+                "bca7c0ebeb47b6d1"
             ]
         ]
     },
     {
-        "id": "c28cea2ef9793d1b",
+        "id": "28f176017d3d0fb7",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration roller_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.timer) {\n    context.timer = {\n        start: null,\n        end: null,\n        pause: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.timer.pause) {\n        // Resuming from pause\n        context.timer.pausedDuration += (Date.now() - context.timer.pause);\n        context.timer.pause = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.timer.start = Date.now();\n        context.timer.end = null;\n        context.timer.duration = 0; // Reset duration on start\n        context.timer.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.timer.start) {\n        context.timer.end = Date.now();\n        context.timer.duration = (context.timer.end - context.timer.start - context.timer.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.timer.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.timer.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.timer.start && !context.timer.pause) {\n        context.timer.pause = Date.now();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.timer.start = null;\n    context.timer.end = null;\n    context.timer.pause = null;\n    context.timer.duration = 0;\n    context.timer.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 915,
-        "y": 660,
+        "x": 875,
+        "y": 645,
         "wires": [
             [
-                "9d04de6c8f4384d0"
+                "a6118e43064416fa"
             ]
         ]
     },
     {
-        "id": "353995e18d2865fc",
+        "id": "cb6d1f639b6adda7",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration pin_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.session) {\n    context.session = {\n        started: null,\n        stopped: null,\n        paused: null,\n        timeElapsed: 0,\n        pausedTimeElapsed: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.session.paused) {\n        // Resuming from pause\n        context.session.pausedTimeElapsed += (Date.now() - context.session.paused);\n        context.session.paused = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.session.started = Date.now();\n        context.session.stopped = null;\n        context.session.timeElapsed = 0; // Reset timeElapsed on start\n        context.session.pausedTimeElapsed = 0; // Reset pausedTimeElapsed on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.session.started) {\n        context.session.stopped = Date.now();\n        context.session.timeElapsed = (context.session.stopped - context.session.started - context.session.pausedTimeElapsed) / 1000; // Calculate timeElapsed in seconds\n        msg.payload = { duration: context.session.timeElapsed };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.session.timeElapsed} sec` });\n        return msg; // Send message with the timeElapsed\n    }\n} else if (action === \"pause\") {\n    if (context.session.started && !context.session.paused) {\n        context.session.paused = Date.now();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.session.started = null;\n    context.session.stopped = null;\n    context.session.paused = null;\n    context.session.timeElapsed = 0;\n    context.session.pausedTimeElapsed = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -105,37 +108,38 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 905,
-        "y": 725,
+        "x": 865,
+        "y": 710,
         "wires": [
             [
-                "856f9bb036398718"
+                "0e3e11cec0205334"
             ]
         ]
     },
     {
-        "id": "52400b9f73abc870",
+        "id": "d4f046e54867ab5e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL mc_fault",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_mc_fault (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1185,
-        "y": 420,
+        "x": 1145,
+        "y": 405,
         "wires": [
             [
-                "296703c6289bdc33"
+                "683a7d2d8a35f8cf"
             ]
         ]
     },
     {
-        "id": "6ae9074a8b15e781",
+        "id": "49857a2888c71862",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL quality_check",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_quality_check (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -143,56 +147,58 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1205,
-        "y": 480,
+        "x": 1165,
+        "y": 465,
         "wires": [
             [
-                "296703c6289bdc33"
+                "683a7d2d8a35f8cf"
             ]
         ]
     },
     {
-        "id": "3d4c4cbfbb0d14fb",
+        "id": "2d48e55c6fc190ae",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL tool_change",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_tool_change (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1195,
-        "y": 540,
+        "x": 1155,
+        "y": 525,
         "wires": [
             [
-                "296703c6289bdc33"
+                "683a7d2d8a35f8cf"
             ]
         ]
     },
     {
-        "id": "3077a31b1b8f67dc",
+        "id": "bca7c0ebeb47b6d1",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL arm_no_part",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_arm_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1195,
-        "y": 600,
+        "x": 1155,
+        "y": 585,
         "wires": [
             [
-                "296703c6289bdc33"
+                "683a7d2d8a35f8cf"
             ]
         ]
     },
     {
-        "id": "9d04de6c8f4384d0",
+        "id": "a6118e43064416fa",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL roller_no_part",
         "func": " if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n     let sql = `INSERT INTO timer_durations_roller_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -200,18 +206,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1205,
-        "y": 660,
+        "x": 1165,
+        "y": 645,
         "wires": [
             [
-                "296703c6289bdc33"
+                "683a7d2d8a35f8cf"
             ]
         ]
     },
     {
-        "id": "856f9bb036398718",
+        "id": "0e3e11cec0205334",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL pin_no_part",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_pin_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -219,18 +225,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1195,
-        "y": 720,
+        "x": 1155,
+        "y": 705,
         "wires": [
             [
-                "296703c6289bdc33"
+                "683a7d2d8a35f8cf"
             ]
         ]
     },
     {
-        "id": "e15c43e74cb750ca",
+        "id": "90c72dddea660168",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^mc_fault^deactivated^#",
         "props": [
             {
@@ -248,18 +254,18 @@
         "topic": "",
         "payload": "~signal^mc_fault^deactivated^#",
         "payloadType": "str",
-        "x": 205,
-        "y": 230,
+        "x": 165,
+        "y": 215,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "94190e33aa880fb2",
+        "id": "ccdbf3d28ccc3769",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^mc_fault^activated^#",
         "props": [
             {
@@ -277,56 +283,58 @@
         "topic": "",
         "payload": "~signal^mc_fault^activated^#",
         "payloadType": "str",
-        "x": 200,
-        "y": 195,
+        "x": 160,
+        "y": 180,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "0ac403266abd1e5f",
+        "id": "9a00819138de8d88",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"mc_fault\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 615,
-        "y": 140,
+        "x": 575,
+        "y": 125,
         "wires": [
             [
-                "2c66d364e20da372"
+                "9d38e8986ae1c85e"
             ]
         ]
     },
     {
-        "id": "352cf9143fe71089",
+        "id": "50cfabcbca9f6dd3",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"mc_fault\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 625,
-        "y": 175,
+        "x": 585,
+        "y": 160,
         "wires": [
             [
-                "2c66d364e20da372"
+                "9d38e8986ae1c85e"
             ]
         ]
     },
     {
-        "id": "970a0c13611d5436",
+        "id": "f43d23ecd00afeef",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~,#",
         "methods": [
             {
@@ -347,18 +355,18 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 310,
-        "y": 140,
+        "x": 270,
+        "y": 125,
         "wires": [
             [
-                "1bd9f6e3b2f9a9dd"
+                "da2963a132e22f83"
             ]
         ]
     },
     {
-        "id": "1bd9f6e3b2f9a9dd",
+        "id": "da2963a132e22f83",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "^,20",
         "methods": [
             {
@@ -379,261 +387,265 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 430,
-        "y": 140,
+        "x": 390,
+        "y": 125,
         "wires": [
             [
-                "0ac403266abd1e5f",
-                "352cf9143fe71089",
-                "d8e13691cf4df859",
-                "1d5c4a7a98ccf6b8",
-                "160212b7f0fde164",
-                "c0c76fc395d44df1",
-                "47dcf32538ea0ba5",
-                "51e608451503c354",
-                "9340287ae3501fbe",
-                "f12c8b28805e45a4",
-                "e748876393344823",
-                "4fed0c8f13daf8e2"
+                "9a00819138de8d88",
+                "50cfabcbca9f6dd3",
+                "f4c295032c78d9ca",
+                "b031c93aadd7be1b",
+                "aae517ddf0699ea1",
+                "70e2e552edac749a",
+                "e912e8d34499d96e",
+                "3ccfa28ce3bd848d",
+                "3d806dc3d493800b",
+                "a5e08d02fd84992e",
+                "127db5a2922894ba",
+                "9ad1422186dd0385"
             ]
         ]
     },
     {
-        "id": "d1ab3e9566bcbfab",
+        "id": "6788897951071148",
         "type": "serial in",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "",
-        "serial": "ddb39cf2d3da96b2",
-        "x": 130,
-        "y": 115,
+        "serial": "4a3ca22424113665",
+        "x": 110,
+        "y": 100,
         "wires": [
             [
-                "970a0c13611d5436",
-                "e56f69c0c3ad27ed",
-                "7fb102a3100e4930",
-                "2d4fe5eeb97a76c5",
-                "0e7cf83011f77920"
+                "f43d23ecd00afeef",
+                "a16ebab4fb2232b2",
+                "8a7907fac214eecc",
+                "e90a8f5943f6d794",
+                "aa07161354d07f3a"
             ]
         ]
     },
     {
-        "id": "d8e13691cf4df859",
+        "id": "f4c295032c78d9ca",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_quality_check_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"quality_check\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 635,
-        "y": 225,
+        "x": 595,
+        "y": 210,
         "wires": [
             [
-                "513af497eb3cba08"
+                "942fc5dab40550af"
             ]
         ]
     },
     {
-        "id": "1d5c4a7a98ccf6b8",
+        "id": "b031c93aadd7be1b",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_quality_check_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"quality_check\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 645,
-        "y": 260,
+        "x": 605,
+        "y": 245,
         "wires": [
             [
-                "513af497eb3cba08"
+                "942fc5dab40550af"
             ]
         ]
     },
     {
-        "id": "160212b7f0fde164",
+        "id": "aae517ddf0699ea1",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_tool_change_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"tool_change\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 635,
-        "y": 310,
+        "x": 595,
+        "y": 295,
         "wires": [
             [
-                "fc0be66fed12a742"
+                "62b8fde44c9c70c3"
             ]
         ]
     },
     {
-        "id": "c0c76fc395d44df1",
+        "id": "70e2e552edac749a",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_tool_change_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"tool_change\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 635,
-        "y": 345,
+        "x": 595,
+        "y": 330,
         "wires": [
             [
-                "fc0be66fed12a742"
+                "62b8fde44c9c70c3"
             ]
         ]
     },
     {
-        "id": "47dcf32538ea0ba5",
+        "id": "e912e8d34499d96e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_arm_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"arm_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 960,
-        "y": 140,
+        "x": 920,
+        "y": 125,
         "wires": [
             [
-                "4616888ee492e119",
-                "f8d39934efd55636",
-                "da6d3127178c99d7"
+                "8b8f91896ec14c8e",
+                "a7a362ae7f885b9c"
             ]
         ]
     },
     {
-        "id": "51e608451503c354",
+        "id": "3ccfa28ce3bd848d",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_arm_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"arm_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 960,
-        "y": 175,
+        "x": 920,
+        "y": 160,
         "wires": [
             [
-                "4616888ee492e119",
-                "5bf645df2ca0d56f",
-                "da6d3127178c99d7"
+                "8b8f91896ec14c8e",
+                "ba2681166e357ee5"
             ]
         ]
     },
     {
-        "id": "9340287ae3501fbe",
+        "id": "3d806dc3d493800b",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_roller_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"roller_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 960,
-        "y": 225,
+        "x": 920,
+        "y": 210,
         "wires": [
             [
-                "c28cea2ef9793d1b",
-                "81aeef868296952e",
-                "61ce3c15f20db348"
+                "28f176017d3d0fb7",
+                "4f771e6f8fd2757a"
             ]
         ]
     },
     {
-        "id": "f12c8b28805e45a4",
+        "id": "a5e08d02fd84992e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_roller_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"roller_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 970,
-        "y": 260,
+        "x": 930,
+        "y": 245,
         "wires": [
             [
-                "c28cea2ef9793d1b",
-                "5bf645df2ca0d56f",
-                "61ce3c15f20db348"
+                "28f176017d3d0fb7",
+                "ab8e9987473d1ce7"
             ]
         ]
     },
     {
-        "id": "e748876393344823",
+        "id": "127db5a2922894ba",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_pin_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"pin_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 950,
-        "y": 310,
+        "x": 910,
+        "y": 295,
         "wires": [
             [
-                "353995e18d2865fc",
-                "0a9c7670589c2cc0",
-                "a4622ac059e002a8"
+                "cb6d1f639b6adda7",
+                "6f61cf9ed16fbbc5"
             ]
         ]
     },
     {
-        "id": "4fed0c8f13daf8e2",
+        "id": "9ad1422186dd0385",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_pin_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal\"){\n    if (data_signal == \"pin_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 960,
-        "y": 345,
+        "x": 920,
+        "y": 330,
         "wires": [
             [
-                "353995e18d2865fc",
-                "5bf645df2ca0d56f",
-                "a4622ac059e002a8"
+                "cb6d1f639b6adda7",
+                "c16f3456b1c705c8"
             ]
         ]
     },
     {
-        "id": "296703c6289bdc33",
+        "id": "683a7d2d8a35f8cf",
         "type": "mysql",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "mydb": "de33f8dbe22463fe",
         "name": "",
-        "x": 1585,
-        "y": 560,
+        "x": 1545,
+        "y": 545,
         "wires": [
             []
         ]
     },
     {
-        "id": "fd52cf51720e0b4c",
+        "id": "0f81a6d627b88e9a",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^tool_change^deactivated^#",
         "props": [
             {
@@ -651,18 +663,18 @@
         "topic": "",
         "payload": "~signal^tool_change^deactivated^#",
         "payloadType": "str",
-        "x": 210,
-        "y": 320,
+        "x": 170,
+        "y": 305,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "a9eedec56734d05b",
+        "id": "c6ed26bef10c0073",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^tool_change^activated^#",
         "props": [
             {
@@ -680,18 +692,18 @@
         "topic": "",
         "payload": "~signal^tool_change^activated^#",
         "payloadType": "str",
-        "x": 205,
-        "y": 285,
+        "x": 165,
+        "y": 270,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "e1434593d4030a72",
+        "id": "623f41db0d7911b7",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^quality_check^deactivated^#",
         "props": [
             {
@@ -709,18 +721,18 @@
         "topic": "",
         "payload": "~signal^quality_check^deactivated^#",
         "payloadType": "str",
-        "x": 215,
-        "y": 410,
+        "x": 175,
+        "y": 395,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "9117f698b61fc650",
+        "id": "a04e0d0126c8a867",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^quality_check^activated^#",
         "props": [
             {
@@ -738,18 +750,18 @@
         "topic": "",
         "payload": "~signal^quality_check^activated^#",
         "payloadType": "str",
-        "x": 220,
-        "y": 375,
+        "x": 180,
+        "y": 360,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "a72b70e11229eba2",
+        "id": "31fd7a6e119e26ba",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^arm_no_part^deactivated^#",
         "props": [
             {
@@ -767,18 +779,18 @@
         "topic": "",
         "payload": "~signal^arm_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 225,
-        "y": 500,
+        "x": 185,
+        "y": 485,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "f31862d74c5ab9cf",
+        "id": "db3ca2df3c7594ca",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^arm_no_part^activated^#",
         "props": [
             {
@@ -796,18 +808,18 @@
         "topic": "",
         "payload": "~signal^arm_no_part^activated^#",
         "payloadType": "str",
-        "x": 220,
-        "y": 465,
+        "x": 180,
+        "y": 450,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "190436895163b90b",
+        "id": "3493c1d50752f61d",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^roller_no_part^deactivated^#",
         "props": [
             {
@@ -825,18 +837,18 @@
         "topic": "",
         "payload": "~signal^roller_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 220,
-        "y": 585,
+        "x": 180,
+        "y": 570,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "aa6f0e27ad0ab3da",
+        "id": "65719858c54e3132",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^roller_no_part^activated^#",
         "props": [
             {
@@ -854,18 +866,18 @@
         "topic": "",
         "payload": "~signal^roller_no_part^activated^#",
         "payloadType": "str",
-        "x": 225,
-        "y": 550,
+        "x": 185,
+        "y": 535,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "73eb70a416c4eb76",
+        "id": "e6fa5776ec19628f",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^pin_no_part^deactivated^#",
         "props": [
             {
@@ -883,18 +895,18 @@
         "topic": "",
         "payload": "~signal^pin_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 225,
-        "y": 670,
+        "x": 185,
+        "y": 655,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "4d37ab2a23c38628",
+        "id": "30c3541656731b5f",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal^pin_no_part^activated^#",
         "props": [
             {
@@ -912,18 +924,18 @@
         "topic": "",
         "payload": "~signal^pin_no_part^activated^#",
         "payloadType": "str",
-        "x": 220,
-        "y": 635,
+        "x": 180,
+        "y": 620,
         "wires": [
             [
-                "970a0c13611d5436"
+                "f43d23ecd00afeef"
             ]
         ]
     },
     {
-        "id": "e56f69c0c3ad27ed",
+        "id": "a16ebab4fb2232b2",
         "type": "debug",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "debug 75",
         "active": false,
         "tosidebar": true,
@@ -932,52 +944,54 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 295,
-        "y": 65,
+        "x": 255,
+        "y": 50,
         "wires": []
     },
     {
-        "id": "fe5a26199c093dd0",
+        "id": "09970978e104a35b",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration mc_fault",
         "func": "// Initialize context variables if not already set\nif (!context.startTime) {\n    context.startTime = null;\n}\nif (!context.stopTime) {\n    context.stopTime = null;\n}\nif (!context.pauseTime) {\n    context.pauseTime = null;\n}\nif (!context.duration) {\n    context.duration = 0;\n}\nif (!context.pausedDuration) {\n    context.pausedDuration = 0;\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.pauseTime) {\n        // Resuming from pause\n        context.pausedDuration += (new Date() - context.pauseTime);\n        context.pauseTime = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.startTime = new Date();\n        context.stopTime = null;\n        context.duration = 0; // Reset duration on start\n        context.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.startTime) {\n        context.stopTime = new Date();\n        context.duration = (context.stopTime - context.startTime - context.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.startTime && !context.pauseTime) {\n        context.pauseTime = new Date();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.startTime = null;\n    context.stopTime = null;\n    context.pauseTime = null;\n    context.duration = 0;\n    context.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 1,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 905,
-        "y": 1180,
+        "x": 865,
+        "y": 1165,
         "wires": [
             [
-                "3b276e7f66840d3f"
+                "732a0d8a860ce302"
             ]
         ]
     },
     {
-        "id": "24149407d76e8825",
+        "id": "b7c87f3376464003",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration quality_check",
         "func": "// Initialize context variables if not already set\nif (!context.state) {\n    context.state = {\n        startTime: null,\n        stopTime: null,\n        pauseTime: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nswitch (action) {\n    case \"start\":\n        if (context.state.pauseTime) {\n            // Resuming from pause\n            context.state.pausedDuration += (new Date() - context.state.pauseTime);\n            context.state.pauseTime = null;\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n        } else {\n            // Starting new\n            context.state.startTime = new Date();\n            context.state.stopTime = null;\n            context.state.duration = 0; // Reset duration on start\n            context.state.pausedDuration = 0; // Reset paused duration on start\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n        }\n        break;\n    \n    case \"stop\":\n        if (context.state.startTime) {\n            context.state.stopTime = new Date();\n            context.state.duration = (context.state.stopTime - context.state.startTime - context.state.pausedDuration) / 1000; // Calculate duration in seconds\n            msg.payload = { duration: context.state.duration };\n            node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.state.duration} sec` });\n            return msg; // Send message with the duration\n        }\n        break;\n    \n    case \"pause\":\n        if (context.state.startTime && !context.state.pauseTime) {\n            context.state.pauseTime = new Date();\n            node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n        }\n        break;\n    \n    case \"reset\":\n        context.state.startTime = null;\n        context.state.stopTime = null;\n        context.state.pauseTime = null;\n        context.state.duration = 0;\n        context.state.pausedDuration = 0;\n        node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n        break;\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 1,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 925,
-        "y": 1240,
+        "x": 885,
+        "y": 1225,
         "wires": [
             [
-                "154e1323d6c35346"
+                "ecc5192dc3808f41"
             ]
         ]
     },
     {
-        "id": "963d1fbe19e3cac9",
+        "id": "38a35b54f2c6f05b",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration tool_change",
         "func": "// Initialize context variables if not already set\nif (!context.timer) {\n    context.timer = {\n        startTime: null,\n        stopTime: null,\n        pauseTime: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.timer.pauseTime) {\n        // Resuming from pause\n        context.timer.pausedDuration += (new Date() - context.timer.pauseTime);\n        context.timer.pauseTime = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.timer.startTime = new Date();\n        context.timer.stopTime = null;\n        context.timer.duration = 0; // Reset duration on start\n        context.timer.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.timer.startTime) {\n        context.timer.stopTime = new Date();\n        context.timer.duration = (context.timer.stopTime - context.timer.startTime - context.timer.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.timer.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.timer.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.timer.startTime && !context.timer.pauseTime) {\n        context.timer.pauseTime = new Date();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.timer.startTime = null;\n    context.timer.stopTime = null;\n    context.timer.pauseTime = null;\n    context.timer.duration = 0;\n    context.timer.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -985,18 +999,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 915,
-        "y": 1300,
+        "x": 875,
+        "y": 1285,
         "wires": [
             [
-                "ae5faa0a39191bb7"
+                "3b74290729fc295b"
             ]
         ]
     },
     {
-        "id": "d3254f0c4559e22a",
+        "id": "74b2249790080345",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration arm_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.time) {\n    context.time = {\n        start: null,\n        stop: null,\n        pause: null,\n        diff: 0,\n        pausedDiff: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.time.pause) {\n        // Resuming from pause\n        context.time.pausedDiff += (new Date().getTime() - context.time.pause);\n        context.time.pause = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.time.start = new Date().getTime();\n        context.time.stop = null;\n        context.time.diff = 0; // Reset diff on start\n        context.time.pausedDiff = 0; // Reset paused diff on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.time.start) {\n        context.time.stop = new Date().getTime();\n        context.time.diff = (context.time.stop - context.time.start - context.time.pausedDiff) / 1000; // Calculate diff in seconds\n        msg.payload = { duration: context.time.diff };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.time.diff} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.time.start && !context.time.pause) {\n        context.time.pause = new Date().getTime();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.time.start = null;\n    context.time.stop = null;\n    context.time.pause = null;\n    context.time.diff = 0;\n    context.time.pausedDiff = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -1004,18 +1018,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 915,
-        "y": 1360,
+        "x": 875,
+        "y": 1345,
         "wires": [
             [
-                "655d6a1c696897d7"
+                "14b9c779cefa092e"
             ]
         ]
     },
     {
-        "id": "62a8c4d2a72fb1c4",
+        "id": "34fe5013fd8593ad",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration roller_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.timer) {\n    context.timer = {\n        start: null,\n        end: null,\n        pause: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.timer.pause) {\n        // Resuming from pause\n        context.timer.pausedDuration += (Date.now() - context.timer.pause);\n        context.timer.pause = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.timer.start = Date.now();\n        context.timer.end = null;\n        context.timer.duration = 0; // Reset duration on start\n        context.timer.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.timer.start) {\n        context.timer.end = Date.now();\n        context.timer.duration = (context.timer.end - context.timer.start - context.timer.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.timer.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.timer.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.timer.start && !context.timer.pause) {\n        context.timer.pause = Date.now();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.timer.start = null;\n    context.timer.end = null;\n    context.timer.pause = null;\n    context.timer.duration = 0;\n    context.timer.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -1023,18 +1037,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 930,
-        "y": 1430,
+        "x": 890,
+        "y": 1415,
         "wires": [
             [
-                "3fa95b92143cfabe"
+                "a80806e713592710"
             ]
         ]
     },
     {
-        "id": "fde4a77d01723386",
+        "id": "3cdd3bae7230b43d",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration pin_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.session) {\n    context.session = {\n        started: null,\n        stopped: null,\n        paused: null,\n        timeElapsed: 0,\n        pausedTimeElapsed: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.session.paused) {\n        // Resuming from pause\n        context.session.pausedTimeElapsed += (Date.now() - context.session.paused);\n        context.session.paused = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.session.started = Date.now();\n        context.session.stopped = null;\n        context.session.timeElapsed = 0; // Reset timeElapsed on start\n        context.session.pausedTimeElapsed = 0; // Reset pausedTimeElapsed on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.session.started) {\n        context.session.stopped = Date.now();\n        context.session.timeElapsed = (context.session.stopped - context.session.started - context.session.pausedTimeElapsed) / 1000; // Calculate timeElapsed in seconds\n        msg.payload = { duration: context.session.timeElapsed };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.session.timeElapsed} sec` });\n        return msg; // Send message with the timeElapsed\n    }\n} else if (action === \"pause\") {\n    if (context.session.started && !context.session.paused) {\n        context.session.paused = Date.now();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.session.started = null;\n    context.session.stopped = null;\n    context.session.paused = null;\n    context.session.timeElapsed = 0;\n    context.session.pausedTimeElapsed = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -1042,37 +1056,38 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 915,
-        "y": 1510,
+        "x": 875,
+        "y": 1495,
         "wires": [
             [
-                "43c9962614963fea"
+                "205fb0e8c69ce3ef"
             ]
         ]
     },
     {
-        "id": "3b276e7f66840d3f",
+        "id": "732a0d8a860ce302",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL mc_fault",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_mc_fault (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1195,
-        "y": 1180,
+        "x": 1155,
+        "y": 1165,
         "wires": [
             [
-                "4576e7a7b709d445"
+                "c774cdafafebfc4f"
             ]
         ]
     },
     {
-        "id": "154e1323d6c35346",
+        "id": "ecc5192dc3808f41",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL quality_check",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_quality_check (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -1080,37 +1095,38 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1215,
-        "y": 1240,
+        "x": 1175,
+        "y": 1225,
         "wires": [
             [
-                "4576e7a7b709d445"
+                "c774cdafafebfc4f"
             ]
         ]
     },
     {
-        "id": "ae5faa0a39191bb7",
+        "id": "3b74290729fc295b",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL tool_change",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_tool_change (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1205,
-        "y": 1300,
+        "x": 1165,
+        "y": 1285,
         "wires": [
             [
-                "4576e7a7b709d445"
+                "c774cdafafebfc4f"
             ]
         ]
     },
     {
-        "id": "655d6a1c696897d7",
+        "id": "14b9c779cefa092e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL arm_no_part",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_arm_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -1118,18 +1134,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1205,
-        "y": 1360,
+        "x": 1165,
+        "y": 1345,
         "wires": [
             [
-                "4576e7a7b709d445"
+                "c774cdafafebfc4f"
             ]
         ]
     },
     {
-        "id": "3fa95b92143cfabe",
+        "id": "a80806e713592710",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL roller_no_part",
         "func": " if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n     let sql = `INSERT INTO timer_durations_roller_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -1137,18 +1153,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1215,
-        "y": 1420,
+        "x": 1175,
+        "y": 1405,
         "wires": [
             [
-                "4576e7a7b709d445"
+                "c774cdafafebfc4f"
             ]
         ]
     },
     {
-        "id": "43c9962614963fea",
+        "id": "205fb0e8c69ce3ef",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL pin_no_part",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_pin_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
@@ -1156,18 +1172,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1205,
-        "y": 1480,
+        "x": 1165,
+        "y": 1465,
         "wires": [
             [
-                "4576e7a7b709d445"
+                "c774cdafafebfc4f"
             ]
         ]
     },
     {
-        "id": "43439b983337796b",
+        "id": "d45d169af9a56bd0",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^mc_fault^deactivated^#",
         "props": [
             {
@@ -1185,18 +1201,18 @@
         "topic": "",
         "payload": "~signal_iaa33^mc_fault^deactivated^#",
         "payloadType": "str",
-        "x": 235,
-        "y": 990,
+        "x": 195,
+        "y": 975,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "e654150ecaa6cf8b",
+        "id": "348312b3f40ddfa6",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^mc_fault^activated^#",
         "props": [
             {
@@ -1214,56 +1230,58 @@
         "topic": "",
         "payload": "~signal_iaa33^mc_fault^activated^#",
         "payloadType": "str",
-        "x": 230,
-        "y": 955,
+        "x": 190,
+        "y": 940,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "512ef7a5e8807a9e",
+        "id": "115d089b3c7258e1",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"mc_fault\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 625,
-        "y": 900,
+        "x": 585,
+        "y": 885,
         "wires": [
             [
-                "fe5a26199c093dd0"
+                "09970978e104a35b"
             ]
         ]
     },
     {
-        "id": "2e3c84a1175ee3d6",
+        "id": "0bfa55d90c4511a7",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"mc_fault\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 635,
-        "y": 935,
+        "x": 595,
+        "y": 920,
         "wires": [
             [
-                "fe5a26199c093dd0"
+                "09970978e104a35b"
             ]
         ]
     },
     {
-        "id": "7fb102a3100e4930",
+        "id": "8a7907fac214eecc",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~,#",
         "methods": [
             {
@@ -1284,18 +1302,18 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 320,
-        "y": 900,
+        "x": 280,
+        "y": 885,
         "wires": [
             [
-                "54a73089170cc535"
+                "0f28437d7f749d3a"
             ]
         ]
     },
     {
-        "id": "54a73089170cc535",
+        "id": "0f28437d7f749d3a",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "^,20",
         "methods": [
             {
@@ -1316,232 +1334,236 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 440,
-        "y": 900,
+        "x": 400,
+        "y": 885,
         "wires": [
             [
-                "512ef7a5e8807a9e",
-                "2e3c84a1175ee3d6",
-                "410ddd3dc478fa46",
-                "8dfefeb9a294cdfd",
-                "2e94eaccfb9cb004",
-                "70dcb54fb4d5ede5",
-                "568c4c101ffd2f1f",
-                "cf8e211f24792961",
-                "e655a1b6a3103228",
-                "2e39b0aa65bb1c7a",
-                "1c36d978cbcda2c7",
-                "522dbf12214a3dfb"
+                "115d089b3c7258e1",
+                "0bfa55d90c4511a7",
+                "74d91d1ec79176ba",
+                "9f91c8e2efbd8134",
+                "3b244196ccb8c5d1",
+                "f2311416809c8dbe",
+                "fce01f6a2045d35b",
+                "41389db5a4d958c6",
+                "ff407a472211e2a1",
+                "63a7b50a6ba01be1",
+                "102b68c62fb79eaa",
+                "db0a3f3102669abc"
             ]
         ]
     },
     {
-        "id": "410ddd3dc478fa46",
+        "id": "74d91d1ec79176ba",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_quality_check_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"quality_check\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 645,
-        "y": 985,
+        "x": 605,
+        "y": 970,
         "wires": [
             [
-                "24149407d76e8825"
+                "b7c87f3376464003"
             ]
         ]
     },
     {
-        "id": "8dfefeb9a294cdfd",
+        "id": "9f91c8e2efbd8134",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_quality_check_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"quality_check\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 655,
-        "y": 1020,
+        "x": 615,
+        "y": 1005,
         "wires": [
             [
-                "24149407d76e8825"
+                "b7c87f3376464003"
             ]
         ]
     },
     {
-        "id": "2e94eaccfb9cb004",
+        "id": "3b244196ccb8c5d1",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_tool_change_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"tool_change\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 645,
-        "y": 1070,
+        "x": 605,
+        "y": 1055,
         "wires": [
             [
-                "963d1fbe19e3cac9"
+                "38a35b54f2c6f05b"
             ]
         ]
     },
     {
-        "id": "70dcb54fb4d5ede5",
+        "id": "f2311416809c8dbe",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_tool_change_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"tool_change\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 640,
-        "y": 1105,
+        "x": 600,
+        "y": 1090,
         "wires": [
             [
-                "963d1fbe19e3cac9"
+                "38a35b54f2c6f05b"
             ]
         ]
     },
     {
-        "id": "568c4c101ffd2f1f",
+        "id": "fce01f6a2045d35b",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_arm_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"arm_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n    \n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 970,
-        "y": 890,
+        "x": 930,
+        "y": 875,
         "wires": [
             [
-                "d3254f0c4559e22a",
-                "7e1cd272a8815d42",
-                "0c83bb80d8322ce9",
-                "e493cdc539676b41"
+                "74b2249790080345",
+                "1b5ead07cef895b7",
+                "7b2e29f3b1cbffae"
             ]
         ]
     },
     {
-        "id": "cf8e211f24792961",
+        "id": "41389db5a4d958c6",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_arm_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"arm_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 970,
-        "y": 935,
+        "x": 930,
+        "y": 920,
         "wires": [
             [
-                "d3254f0c4559e22a",
-                "5bf645df2ca0d56f",
-                "e493cdc539676b41"
+                "74b2249790080345",
+                "362ee770344d7fae"
             ]
         ]
     },
     {
-        "id": "e655a1b6a3103228",
+        "id": "ff407a472211e2a1",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_roller_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"roller_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 970,
-        "y": 985,
+        "x": 930,
+        "y": 970,
         "wires": [
             [
-                "62a8c4d2a72fb1c4",
-                "ac26836b1e609758",
-                "6c738004a6a2ce25"
+                "34fe5013fd8593ad",
+                "741d0cb9cc77baed"
             ]
         ]
     },
     {
-        "id": "2e39b0aa65bb1c7a",
+        "id": "63a7b50a6ba01be1",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_roller_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"roller_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 980,
-        "y": 1020,
+        "x": 940,
+        "y": 1005,
         "wires": [
             [
-                "62a8c4d2a72fb1c4",
-                "5bf645df2ca0d56f",
-                "6c738004a6a2ce25"
+                "34fe5013fd8593ad",
+                "d2fbf90b6b5fddff"
             ]
         ]
     },
     {
-        "id": "1c36d978cbcda2c7",
+        "id": "102b68c62fb79eaa",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_pin_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"pin_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 960,
-        "y": 1070,
+        "x": 920,
+        "y": 1055,
         "wires": [
             [
-                "fde4a77d01723386",
-                "21feb873945f398e",
-                "7b8dd0a1ddc4149a"
+                "3cdd3bae7230b43d",
+                "8746fe3011deedec"
             ]
         ]
     },
     {
-        "id": "522dbf12214a3dfb",
+        "id": "db0a3f3102669abc",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_pin_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iaa33\"){\n    if (data_signal == \"pin_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 970,
-        "y": 1105,
+        "x": 930,
+        "y": 1090,
         "wires": [
             [
-                "fde4a77d01723386",
-                "5bf645df2ca0d56f",
-                "7b8dd0a1ddc4149a"
+                "3cdd3bae7230b43d",
+                "e38184c2c17a80f3"
             ]
         ]
     },
     {
-        "id": "f93321fdfc37988f",
+        "id": "a044ce83ea7841cc",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^tool_change^deactivated^#",
         "props": [
             {
@@ -1559,18 +1581,18 @@
         "topic": "",
         "payload": "~signal_iaa33^tool_change^deactivated^#",
         "payloadType": "str",
-        "x": 240,
-        "y": 1080,
+        "x": 200,
+        "y": 1065,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "f535ae6fa4821908",
+        "id": "475801df825bf4d9",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^tool_change^activated^#",
         "props": [
             {
@@ -1588,18 +1610,18 @@
         "topic": "",
         "payload": "~signal_iaa33^tool_change^activated^#",
         "payloadType": "str",
-        "x": 235,
-        "y": 1045,
+        "x": 195,
+        "y": 1030,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "83b54e5e2927a2c5",
+        "id": "6cbd8947a9defdb6",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^quality_check^deactivated^#",
         "props": [
             {
@@ -1617,18 +1639,18 @@
         "topic": "",
         "payload": "~signal_iaa33^quality_check^deactivated^#",
         "payloadType": "str",
-        "x": 255,
-        "y": 1170,
+        "x": 215,
+        "y": 1155,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "309254439ae71d49",
+        "id": "0e0928283c2ff53a",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^quality_check^activated^#",
         "props": [
             {
@@ -1646,18 +1668,18 @@
         "topic": "",
         "payload": "~signal_iaa33^quality_check^activated^#",
         "payloadType": "str",
-        "x": 250,
-        "y": 1135,
+        "x": 210,
+        "y": 1120,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "58b6857e7f26b8d2",
+        "id": "5a99a037ded946e7",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^arm_no_part^deactivated^#",
         "props": [
             {
@@ -1675,18 +1697,18 @@
         "topic": "",
         "payload": "~signal_iaa33^arm_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 255,
-        "y": 1260,
+        "x": 215,
+        "y": 1245,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "681886a59ba58f60",
+        "id": "2949e4eb5e5e7fad",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^arm_no_part^activated^#",
         "props": [
             {
@@ -1704,18 +1726,18 @@
         "topic": "",
         "payload": "~signal_iaa33^arm_no_part^activated^#",
         "payloadType": "str",
-        "x": 250,
-        "y": 1225,
+        "x": 210,
+        "y": 1210,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "676ed976b2f54d1c",
+        "id": "3f22b3b133ebce0f",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^roller_no_part^deactivated^#",
         "props": [
             {
@@ -1733,18 +1755,18 @@
         "topic": "",
         "payload": "~signal_iaa33^roller_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 260,
-        "y": 1345,
+        "x": 220,
+        "y": 1330,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "fa7491315907d09e",
+        "id": "8a722eaf499a7516",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^roller_no_part^activated^#",
         "props": [
             {
@@ -1762,18 +1784,18 @@
         "topic": "",
         "payload": "~signal_iaa33^roller_no_part^activated^#",
         "payloadType": "str",
-        "x": 255,
-        "y": 1310,
+        "x": 215,
+        "y": 1295,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "9e3b8e6e6c110260",
+        "id": "ea734d0493c587de",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^pin_no_part^deactivated^#",
         "props": [
             {
@@ -1791,18 +1813,18 @@
         "topic": "",
         "payload": "~signal_iaa33^pin_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 255,
-        "y": 1430,
+        "x": 215,
+        "y": 1415,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "cbf62460db934ab0",
+        "id": "79003551a47ae5a0",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iaa33^pin_no_part^activated^#",
         "props": [
             {
@@ -1820,106 +1842,110 @@
         "topic": "",
         "payload": "~signal_iaa33^pin_no_part^activated^#",
         "payloadType": "str",
-        "x": 250,
-        "y": 1395,
+        "x": 210,
+        "y": 1380,
         "wires": [
             [
-                "7fb102a3100e4930"
+                "8a7907fac214eecc"
             ]
         ]
     },
     {
-        "id": "4576e7a7b709d445",
+        "id": "c774cdafafebfc4f",
         "type": "mysql",
-        "z": "8e30d240404d539c",
-        "mydb": "7411ac616e5fc7a3",
+        "z": "24034456db30f6e3",
+        "mydb": "787813855a4f46ed",
         "name": "",
-        "x": 1565,
-        "y": 1295,
+        "x": 1525,
+        "y": 1280,
         "wires": [
             []
         ]
     },
     {
-        "id": "089d96d726d8e094",
+        "id": "84f5189a930cea3a",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration mc_fault",
         "func": "// Initialize context variables if not already set\nif (!context.startTime) {\n    context.startTime = null;\n}\nif (!context.stopTime) {\n    context.stopTime = null;\n}\nif (!context.pauseTime) {\n    context.pauseTime = null;\n}\nif (!context.duration) {\n    context.duration = 0;\n}\nif (!context.pausedDuration) {\n    context.pausedDuration = 0;\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.pauseTime) {\n        // Resuming from pause\n        context.pausedDuration += (new Date() - context.pauseTime);\n        context.pauseTime = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.startTime = new Date();\n        context.stopTime = null;\n        context.duration = 0; // Reset duration on start\n        context.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.startTime) {\n        context.stopTime = new Date();\n        context.duration = (context.stopTime - context.startTime - context.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.startTime && !context.pauseTime) {\n        context.pauseTime = new Date();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.startTime = null;\n    context.stopTime = null;\n    context.pauseTime = null;\n    context.duration = 0;\n    context.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 1,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 980,
-        "y": 1760,
+        "x": 940,
+        "y": 1745,
         "wires": [
             [
-                "c4c93cb7d9e84eeb"
+                "a17c911a9429b237"
             ]
         ]
     },
     {
-        "id": "ae2ff416a7449b57",
+        "id": "c9d165b4cb762590",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration hopper_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.state) {\n    context.state = {\n        startTime: null,\n        stopTime: null,\n        pauseTime: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nswitch (action) {\n    case \"start\":\n        if (context.state.pauseTime) {\n            // Resuming from pause\n            context.state.pausedDuration += (new Date() - context.state.pauseTime);\n            context.state.pauseTime = null;\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n        } else {\n            // Starting new\n            context.state.startTime = new Date();\n            context.state.stopTime = null;\n            context.state.duration = 0; // Reset duration on start\n            context.state.pausedDuration = 0; // Reset paused duration on start\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n        }\n        break;\n    \n    case \"stop\":\n        if (context.state.startTime) {\n            context.state.stopTime = new Date();\n            context.state.duration = (context.state.stopTime - context.state.startTime - context.state.pausedDuration) / 1000; // Calculate duration in seconds\n            msg.payload = { duration: context.state.duration };\n            node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.state.duration} sec` });\n            return msg; // Send message with the duration\n        }\n        break;\n    \n    case \"pause\":\n        if (context.state.startTime && !context.state.pauseTime) {\n            context.state.pauseTime = new Date();\n            node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n        }\n        break;\n    \n    case \"reset\":\n        context.state.startTime = null;\n        context.state.stopTime = null;\n        context.state.pauseTime = null;\n        context.state.duration = 0;\n        context.state.pausedDuration = 0;\n        node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n        break;\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 1,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1000,
-        "y": 1820,
+        "x": 960,
+        "y": 1805,
         "wires": [
             [
-                "a96d94c3d3531c5b"
+                "a2436b26626b1b50"
             ]
         ]
     },
     {
-        "id": "c4c93cb7d9e84eeb",
+        "id": "a17c911a9429b237",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL mc_fault",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_mc_fault (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1270,
-        "y": 1760,
+        "x": 1230,
+        "y": 1745,
         "wires": [
             [
-                "6f1d1786276228d9"
+                "24219557b9dddad7"
             ]
         ]
     },
     {
-        "id": "a96d94c3d3531c5b",
+        "id": "a2436b26626b1b50",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL hopper_no_part",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_hopper_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1290,
-        "y": 1820,
+        "x": 1250,
+        "y": 1805,
         "wires": [
             [
-                "6f1d1786276228d9"
+                "24219557b9dddad7"
             ]
         ]
     },
     {
-        "id": "de6c2dc40f93e617",
+        "id": "35800a7c571c907e",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam73^mc_fault^deactivated^#",
         "props": [
             {
@@ -1937,18 +1963,18 @@
         "topic": "",
         "payload": "~signal_iam73^mc_fault^deactivated^#",
         "payloadType": "str",
-        "x": 240,
-        "y": 1815,
+        "x": 200,
+        "y": 1800,
         "wires": [
             [
-                "2d4fe5eeb97a76c5"
+                "e90a8f5943f6d794"
             ]
         ]
     },
     {
-        "id": "df02528337611aa4",
+        "id": "8501508e922b44f2",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam73^mc_fault^activated^#",
         "props": [
             {
@@ -1966,56 +1992,60 @@
         "topic": "",
         "payload": "~signal_iam73^mc_fault^activated^#",
         "payloadType": "str",
-        "x": 235,
-        "y": 1780,
+        "x": 195,
+        "y": 1765,
         "wires": [
             [
-                "2d4fe5eeb97a76c5"
+                "e90a8f5943f6d794"
             ]
         ]
     },
     {
-        "id": "46354a577aab0233",
+        "id": "64672681bdf1c99f",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam73\"){\n    if (data_signal == \"mc_fault\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 630,
-        "y": 1725,
+        "x": 590,
+        "y": 1710,
         "wires": [
             [
-                "089d96d726d8e094"
+                "84f5189a930cea3a",
+                "cb984a3e3063c03e"
             ]
         ]
     },
     {
-        "id": "d33c1543a3672cba",
+        "id": "2d9b512ee0eec103",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam73\"){\n    if (data_signal == \"mc_fault\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 640,
-        "y": 1760,
+        "x": 600,
+        "y": 1745,
         "wires": [
             [
-                "089d96d726d8e094"
+                "84f5189a930cea3a",
+                "9ad1361942a92a68"
             ]
         ]
     },
     {
-        "id": "2d4fe5eeb97a76c5",
+        "id": "e90a8f5943f6d794",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~,#",
         "methods": [
             {
@@ -2036,18 +2066,18 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 325,
-        "y": 1725,
+        "x": 285,
+        "y": 1710,
         "wires": [
             [
-                "44ff0abc427b382d"
+                "5a77b70d3d1f9337"
             ]
         ]
     },
     {
-        "id": "44ff0abc427b382d",
+        "id": "5a77b70d3d1f9337",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "^,20",
         "methods": [
             {
@@ -2068,63 +2098,63 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 445,
-        "y": 1725,
+        "x": 405,
+        "y": 1710,
         "wires": [
             [
-                "46354a577aab0233",
-                "d33c1543a3672cba",
-                "41e21fd3617da7f8",
-                "827811d870a445f1"
+                "64672681bdf1c99f",
+                "2d9b512ee0eec103",
+                "c482393dd7f9b5cc",
+                "2c1c66054bc76683"
             ]
         ]
     },
     {
-        "id": "41e21fd3617da7f8",
+        "id": "c482393dd7f9b5cc",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_hopper_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam73\"){\n    if (data_signal == \"hopper_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 1810,
+        "x": 620,
+        "y": 1850,
         "wires": [
             [
-                "ae2ff416a7449b57",
-                "c3e7e344684c3796",
-                "45d61ea24817a862"
+                "c9d165b4cb762590",
+                "a5c2bd74801a17b0"
             ]
         ]
     },
     {
-        "id": "827811d870a445f1",
+        "id": "2c1c66054bc76683",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_hopper_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam73\"){\n    if (data_signal == \"hopper_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 1845,
+        "x": 620,
+        "y": 1885,
         "wires": [
             [
-                "ae2ff416a7449b57",
-                "5bf645df2ca0d56f",
-                "45d61ea24817a862"
+                "c9d165b4cb762590",
+                "803087a08a7e0291"
             ]
         ]
     },
     {
-        "id": "89b5b00e1caa333a",
+        "id": "364ec1aef189f068",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam73^hopper_no_part^deactivated^#",
         "props": [
             {
@@ -2142,18 +2172,18 @@
         "topic": "",
         "payload": "~signal_iam73^hopper_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 255,
-        "y": 1905,
+        "x": 215,
+        "y": 1890,
         "wires": [
             [
-                "2d4fe5eeb97a76c5"
+                "e90a8f5943f6d794"
             ]
         ]
     },
     {
-        "id": "73def94ee1d46abc",
+        "id": "b2bf255729e4b96b",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam73^hopper_no_part^activated^#",
         "props": [
             {
@@ -2171,30 +2201,30 @@
         "topic": "",
         "payload": "~signal_iam73^hopper_no_part^activated^#",
         "payloadType": "str",
-        "x": 260,
-        "y": 1870,
+        "x": 220,
+        "y": 1855,
         "wires": [
             [
-                "2d4fe5eeb97a76c5"
+                "e90a8f5943f6d794"
             ]
         ]
     },
     {
-        "id": "6f1d1786276228d9",
+        "id": "24219557b9dddad7",
         "type": "mysql",
-        "z": "8e30d240404d539c",
-        "mydb": "c3711faee88c2c59",
+        "z": "24034456db30f6e3",
+        "mydb": "7dcb3745c1f6d11e",
         "name": "",
-        "x": 1590,
-        "y": 1775,
+        "x": 1550,
+        "y": 1760,
         "wires": [
             []
         ]
     },
     {
-        "id": "30b27b26be4eb5c6",
+        "id": "67fe5a2bcd19aa32",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration mc_fault",
         "func": "// Initialize context variables if not already set\nif (!context.startTime) {\n    context.startTime = null;\n}\nif (!context.stopTime) {\n    context.stopTime = null;\n}\nif (!context.pauseTime) {\n    context.pauseTime = null;\n}\nif (!context.duration) {\n    context.duration = 0;\n}\nif (!context.pausedDuration) {\n    context.pausedDuration = 0;\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nif (action === \"start\") {\n    if (context.pauseTime) {\n        // Resuming from pause\n        context.pausedDuration += (new Date() - context.pauseTime);\n        context.pauseTime = null;\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n    } else {\n        // Starting new\n        context.startTime = new Date();\n        context.stopTime = null;\n        context.duration = 0; // Reset duration on start\n        context.pausedDuration = 0; // Reset paused duration on start\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n    }\n} else if (action === \"stop\") {\n    if (context.startTime) {\n        context.stopTime = new Date();\n        context.duration = (context.stopTime - context.startTime - context.pausedDuration) / 1000; // Calculate duration in seconds\n        msg.payload = { duration: context.duration };\n        node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.duration} sec` });\n        return msg; // Send message with the duration\n    }\n} else if (action === \"pause\") {\n    if (context.startTime && !context.pauseTime) {\n        context.pauseTime = new Date();\n        node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n    }\n} else if (action === \"reset\") {\n    context.startTime = null;\n    context.stopTime = null;\n    context.pauseTime = null;\n    context.duration = 0;\n    context.pausedDuration = 0;\n    node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
@@ -2202,75 +2232,78 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 980,
-        "y": 2030,
+        "x": 940,
+        "y": 2015,
         "wires": [
             [
-                "dc1ea32a60303e3d"
+                "3c7a0ae2b8effd5e"
             ]
         ]
     },
     {
-        "id": "acb3cc617fe51d69",
+        "id": "c1dab48707e96db2",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Calculate Duration hopper_no_part",
         "func": "// Initialize context variables if not already set\nif (!context.state) {\n    context.state = {\n        startTime: null,\n        stopTime: null,\n        pauseTime: null,\n        duration: 0,\n        pausedDuration: 0\n    };\n}\n\n// Get the action from the input message\nlet action = msg.payload.action;\n\n// Handle the different actions\nswitch (action) {\n    case \"start\":\n        if (context.state.pauseTime) {\n            // Resuming from pause\n            context.state.pausedDuration += (new Date() - context.state.pauseTime);\n            context.state.pauseTime = null;\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Resumed\" });\n        } else {\n            // Starting new\n            context.state.startTime = new Date();\n            context.state.stopTime = null;\n            context.state.duration = 0; // Reset duration on start\n            context.state.pausedDuration = 0; // Reset paused duration on start\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Started\" });\n        }\n        break;\n    \n    case \"stop\":\n        if (context.state.startTime) {\n            context.state.stopTime = new Date();\n            context.state.duration = (context.state.stopTime - context.state.startTime - context.state.pausedDuration) / 1000; // Calculate duration in seconds\n            msg.payload = { duration: context.state.duration };\n            node.status({ fill: \"red\", shape: \"dot\", text: `Stopped: ${context.state.duration} sec` });\n            return msg; // Send message with the duration\n        }\n        break;\n    \n    case \"pause\":\n        if (context.state.startTime && !context.state.pauseTime) {\n            context.state.pauseTime = new Date();\n            node.status({ fill: \"yellow\", shape: \"dot\", text: \"Paused\" });\n        }\n        break;\n    \n    case \"reset\":\n        context.state.startTime = null;\n        context.state.stopTime = null;\n        context.state.pauseTime = null;\n        context.state.duration = 0;\n        context.state.pausedDuration = 0;\n        node.status({ fill: \"blue\", shape: \"dot\", text: \"Reset\" });\n        break;\n}\n\n// Do not send a message for start and reset actions\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 1,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1000,
-        "y": 2090,
+        "x": 960,
+        "y": 2075,
         "wires": [
             [
-                "c035dea7cb64498b"
+                "53946d235fa9341e"
             ]
         ]
     },
     {
-        "id": "dc1ea32a60303e3d",
+        "id": "3c7a0ae2b8effd5e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL mc_fault",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_mc_fault (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1270,
-        "y": 2030,
+        "x": 1230,
+        "y": 2015,
         "wires": [
             [
-                "2ec1fb3d8e6ee0b3"
+                "eb328280ef82a192"
             ]
         ]
     },
     {
-        "id": "c035dea7cb64498b",
+        "id": "53946d235fa9341e",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Save to MySQL hopper_no_part",
         "func": "if (msg.payload.duration) {\n    let duration = msg.payload.duration;\n    let sql = `INSERT INTO timer_durations_hopper_no_part (timer_id, duration) VALUES (1, ${duration})`;\n    msg.topic = sql;\n    return msg;\n}\nreturn null;",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1290,
-        "y": 2090,
+        "x": 1250,
+        "y": 2075,
         "wires": [
             [
-                "2ec1fb3d8e6ee0b3"
+                "eb328280ef82a192"
             ]
         ]
     },
     {
-        "id": "2c31be723b43f5cf",
+        "id": "1187c3f74231df4a",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam72^mc_fault^deactivated^#",
         "props": [
             {
@@ -2288,18 +2321,18 @@
         "topic": "",
         "payload": "~signal_iam72^mc_fault^deactivated^#",
         "payloadType": "str",
-        "x": 240,
-        "y": 2085,
+        "x": 200,
+        "y": 2070,
         "wires": [
             [
-                "0e7cf83011f77920"
+                "aa07161354d07f3a"
             ]
         ]
     },
     {
-        "id": "a2c3c914e1794150",
+        "id": "07283887318ebce1",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam72^mc_fault^activated^#",
         "props": [
             {
@@ -2317,56 +2350,60 @@
         "topic": "",
         "payload": "~signal_iam72^mc_fault^activated^#",
         "payloadType": "str",
-        "x": 235,
-        "y": 2050,
+        "x": 195,
+        "y": 2035,
         "wires": [
             [
-                "0e7cf83011f77920"
+                "aa07161354d07f3a"
             ]
         ]
     },
     {
-        "id": "0cb0d611f3991be3",
+        "id": "2b9e33537cf90ad9",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam72\"){\n    if (data_signal == \"mc_fault\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 630,
-        "y": 1995,
+        "x": 590,
+        "y": 1980,
         "wires": [
             [
-                "30b27b26be4eb5c6"
+                "67fe5a2bcd19aa32",
+                "a307b9a8b05566b3"
             ]
         ]
     },
     {
-        "id": "d77594e96cdaa50e",
+        "id": "1340adf38711b7ef",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_mc_fault_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam72\"){\n    if (data_signal == \"mc_fault\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 640,
-        "y": 2030,
+        "x": 600,
+        "y": 2015,
         "wires": [
             [
-                "30b27b26be4eb5c6"
+                "67fe5a2bcd19aa32",
+                "9fb992a21be7f3d9"
             ]
         ]
     },
     {
-        "id": "0e7cf83011f77920",
+        "id": "aa07161354d07f3a",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~,#",
         "methods": [
             {
@@ -2387,18 +2424,18 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 325,
-        "y": 1995,
+        "x": 285,
+        "y": 1980,
         "wires": [
             [
-                "9e02f49f72301849"
+                "0e2d6d0760a53735"
             ]
         ]
     },
     {
-        "id": "9e02f49f72301849",
+        "id": "0e2d6d0760a53735",
         "type": "string",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "^,20",
         "methods": [
             {
@@ -2419,63 +2456,63 @@
         "propout": "payload",
         "object": "msg",
         "objectout": "msg",
-        "x": 445,
-        "y": 1995,
+        "x": 405,
+        "y": 1980,
         "wires": [
             [
-                "0cb0d611f3991be3",
-                "d77594e96cdaa50e",
-                "eb34248bac92083d",
-                "a49e8d325579c679"
+                "2b9e33537cf90ad9",
+                "1340adf38711b7ef",
+                "35403897d0fb4596",
+                "b4074b37202f5537"
             ]
         ]
     },
     {
-        "id": "eb34248bac92083d",
+        "id": "35403897d0fb4596",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_hopper_no_part_activated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam72\"){\n    if (data_signal == \"hopper_no_part\" && data_status == \"activated\"){\n        msg.payload = {\n            \"action\": \"start\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 2080,
+        "x": 625,
+        "y": 2185,
         "wires": [
             [
-                "acb3cc617fe51d69",
-                "cabddd7bd6de87fc",
-                "984f5545efa11d47"
+                "c1dab48707e96db2",
+                "d97cabc8eec484cd"
             ]
         ]
     },
     {
-        "id": "a49e8d325579c679",
+        "id": "b4074b37202f5537",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "signal_hopper_no_part_deactivated",
         "func": "var data_condition;\nvar data_signal;\nvar data_status;\n\n\ndata_condition = msg.payload[0]\ndata_signal = msg.payload[1]\ndata_status = msg.payload[2]\n\nif (data_condition == \"signal_iam72\"){\n    if (data_signal == \"hopper_no_part\" && data_status == \"deactivated\"){\n        msg.payload = {\n            \"action\": \"stop\"\n        };\n        return msg;\n    }\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 2115,
+        "x": 625,
+        "y": 2225,
         "wires": [
             [
-                "acb3cc617fe51d69",
-                "5bf645df2ca0d56f",
-                "984f5545efa11d47"
+                "c1dab48707e96db2",
+                "da454441eba4afd7"
             ]
         ]
     },
     {
-        "id": "f73ac14dfc8425ad",
+        "id": "105fcab9278ad18e",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam72^hopper_no_part^deactivated^#",
         "props": [
             {
@@ -2493,18 +2530,18 @@
         "topic": "",
         "payload": "~signal_iam72^hopper_no_part^deactivated^#",
         "payloadType": "str",
-        "x": 255,
-        "y": 2175,
+        "x": 215,
+        "y": 2160,
         "wires": [
             [
-                "0e7cf83011f77920"
+                "aa07161354d07f3a"
             ]
         ]
     },
     {
-        "id": "d368115562b7eeb2",
+        "id": "0573b8e16d398692",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "~signal_iam72^hopper_no_part^activated^#",
         "props": [
             {
@@ -2522,137 +2559,142 @@
         "topic": "",
         "payload": "~signal_iam72^hopper_no_part^activated^#",
         "payloadType": "str",
-        "x": 260,
-        "y": 2140,
+        "x": 220,
+        "y": 2125,
         "wires": [
             [
-                "0e7cf83011f77920"
+                "aa07161354d07f3a"
             ]
         ]
     },
     {
-        "id": "2ec1fb3d8e6ee0b3",
+        "id": "eb328280ef82a192",
         "type": "mysql",
-        "z": "8e30d240404d539c",
-        "mydb": "5f365ca3030d2193",
+        "z": "24034456db30f6e3",
+        "mydb": "51e6297883dcba65",
         "name": "",
-        "x": 1590,
-        "y": 2045,
+        "x": 1550,
+        "y": 2030,
         "wires": [
             []
         ]
     },
     {
-        "id": "a65641852f421a31",
+        "id": "3907649e4f54e539",
         "type": "mysql",
-        "z": "8e30d240404d539c",
-        "mydb": "",
+        "z": "24034456db30f6e3",
+        "mydb": "90f875a253a55c6f",
         "name": "",
-        "x": 3595,
-        "y": 1585,
+        "x": 2615,
+        "y": 1140,
         "wires": [
             []
         ]
     },
     {
-        "id": "0e46df351ed6ade8",
+        "id": "c42dc406a178cb96",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "Build SQL Update",
-        "func": "var id = msg.id;\nvar andon = msg.andon;\n\nif(msg.id == \"1\"){\n    msg.topic = `UPDATE andon_roller_arm SET andon='${andon}' WHERE id=${id}`;  \n    return msg;\n}\n",
+        "func": "var id = msg.id;\nvar andon = msg.andon;\n\nif(msg.id == \"1\"){\n    msg.topic = `UPDATE table_andon SET andon='${andon}' WHERE id=${id}`;  \n    return msg;\n}\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 3420,
-        "y": 1585,
+        "x": 2980,
+        "y": 1405,
         "wires": [
             [
-                "a65641852f421a31"
+                "061b3c9fcc444f57"
             ]
         ]
     },
     {
-        "id": "4c8114ff75f0d65f",
+        "id": "ea682a398cf883e3",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "OR Gate",
-        "func": "if (msg.payload.a == '1' || msg.payload.b == '1'|| msg.payload.c == '1' || msg.payload.d == '1') {\n    msg.payload = '1';\n} else {\n    msg.payload = 'aman!!!';\n}\nreturn msg;\n",
+        "func": "if ( msg.payload.iaa33_pin == \"1\" || msg.payload.iaa33_roller == \"1\" || msg.payload.iaa33_arm == \"1\" || msg.payload.iaa35_pin == \"1\" || msg.payload.iaa35_roller == \"1\" || msg.payload.iaa35_arm == \"1\" || msg.payload.iam72_hopper == \"1\" || msg.payload.iam73_hopper == \"1\") {\n    msg.payload = '1';\n} else {\n    msg.payload = 'aman!!!';\n}\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 3075,
-        "y": 1565,
+        "x": 2635,
+        "y": 1385,
         "wires": [
             [
-                "299891c4daa83e50"
+                "5faa9b44f5689740"
             ]
         ]
     },
     {
-        "id": "46a11f3ca2f7b0c7",
+        "id": "bc6872fee325d076",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "AND Gate",
         "func": "if (msg.payload.a == '1' && msg.payload.b == '1' && msg.payload.c == '1' && msg.payload.d == '1') {\n    msg.payload = '1';\n} else {\n    msg.payload = 'aman!!!';\n}\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 3070,
-        "y": 1615,
+        "x": 2590,
+        "y": 1455,
         "wires": [
             [
-                "828d94ae0f8240ee"
+                "b0c518f8c8bffb0f"
             ]
         ]
     },
     {
-        "id": "299891c4daa83e50",
+        "id": "5faa9b44f5689740",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "ANDON ON",
-        "func": "if(msg.payload == '1'){\n    var msg = {\n        payload: \"\",\n        id: 1,\n        andon: \"ON\"\n    };\n}\n\n\n\nreturn msg;\n",
+        "func": "if(msg.payload == \"1\"){\n    var msg = {\n        payload: \"\",\n        id: 1,\n        andon: \"ON\"\n    };\n}\n\n\n\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 3240,
-        "y": 1565,
+        "x": 2800,
+        "y": 1385,
         "wires": [
             [
-                "0e46df351ed6ade8"
+                "c42dc406a178cb96"
             ]
         ]
     },
     {
-        "id": "828d94ae0f8240ee",
+        "id": "b0c518f8c8bffb0f",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "ANDON OFF",
         "func": "if(msg.payload == '1'){\n    var msg = {\n        payload: \"\",\n        id: 1,\n        andon: \"OFF\"\n    };\n}\n\n\n\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 3235,
-        "y": 1615,
+        "x": 2795,
+        "y": 1435,
         "wires": [
             [
-                "0e46df351ed6ade8"
+                "c42dc406a178cb96"
             ]
         ]
     },
     {
-        "id": "cdebe7d564dfdaaa",
+        "id": "a24ba7e284b4459c",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "MANUAL ON",
         "props": [
             {
@@ -2670,56 +2712,532 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 2815,
-        "y": 1740,
+        "x": 2565,
+        "y": 1565,
         "wires": [
             [
-                "1fd5f3ce1b0ce20d"
+                "f9acc455e7727997"
             ]
         ]
     },
     {
-        "id": "1fd5f3ce1b0ce20d",
+        "id": "f9acc455e7727997",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "on",
-        "func": "msg.payload = {\n    \"action\": \"start\",\n    \"a\" : \"1\"\n};\n\nreturn msg;",
+        "func": "msg.payload = \"1\"\n\nreturn msg;",
         "outputs": 1,
+        "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2920,
-        "y": 1560,
+        "x": 2765,
+        "y": 1525,
         "wires": [
             [
-                "4c8114ff75f0d65f"
+                "5faa9b44f5689740"
             ]
         ]
     },
     {
-        "id": "5bf645df2ca0d56f",
+        "id": "93551421394d8435",
         "type": "function",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "off",
         "func": "msg.payload = {\n    \"action\": \"stop\",\n    \"a\" : \"1\",\n    \"b\": \"1\",\n    \"c\" : \"1\",\n    \"d\" : \"1\"\n};\n\nreturn msg;",
         "outputs": 1,
+        "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2925,
-        "y": 1615,
+        "x": 2765,
+        "y": 1600,
         "wires": [
             [
-                "46a11f3ca2f7b0c7"
+                "bc6872fee325d076"
             ]
         ]
     },
     {
-        "id": "8cd62d545a81f795",
+        "id": "a7a362ae7f885b9c",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa35_arm_on",
+        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa35_arm = \"1\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1930,
+        "y": 630,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "4f771e6f8fd2757a",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa35_roller_on",
+        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa35_roller = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}// var andon_iaa33_arm;\n// var andon_iaa33_pin;\n// var andon_iaa33_roller;\n// var andon_iaa35_arm;\n// var andon_iaa35_roller;\n// var andon_iaa35_pin;\n// var andon_iam73_hopper;\n// var andon_iam73_mc_fault;\n// var andon_iam72_hopper;\n// var andon_iam72_mc_fault;\n\n// var andon_iaa36_arm = 2; // Default value\n// var andon_iaa36_roller = 2; // Default value\n// var andon_iaa36_pin = 2; // Default value\n// var andon_iam80_hopper = 2; // Default value\n// var andon_iam80_mc_fault = 2; // Default value\n// var ispbr3_arm = 2; // Default value\n// var ispbr3_mc_fault = 2; // Default value\n\n\n\n// Kondisi untuk iaa33_arm\nif (msg.payload.iaa33_arm == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_arm = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa33_arm == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_arm = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n\n\n\n\n\n\n// var data = {\n//     iaa33_bearing: andon_iaa33_roller,\n//     iaa33_pin: andon_iaa33_pin,\n//     iaa33_arm: andon_iaa33_arm,\n//     iaa35_bearing: andon_iaa35_roller,\n//     iaa35_pin: andon_iaa35_pin,\n//     iaa35_arm: andon_iaa35_arm,\n//     iaa36_bearing: andon_iaa36_roller,\n//     iaa36_pin: andon_iaa36_pin,\n//     iaa36_arm: andon_iaa36_arm,\n//     iam72_hopper: andon_iam72_hopper,\n//     iam72_mc_fault: andon_iam72_mc_fault,\n//     iam73_hopper: andon_iam73_hopper,\n//     iam73_mc_fault: andon_iam73_mc_fault,\n//     iam80_hopper: andon_iam80_hopper,\n//     iam80_mc_fault: andon_iam80_mc_fault,\n//     ispbr3_arm: ispbr3_arm,\n//     ispbr3_mc_fault: ispbr3_mc_fault\n// };\n\n\n\n\n// var query = `\n//     UPDATE table_condition_andon\n//     SET iaa33_bearing = ${data.iaa33_bearing},\n//         iaa33_pin = ${data.iaa33_pin},\n//         iaa33_arm = ${data.iaa33_arm},\n//         iaa35_bearing = ${data.iaa35_bearing},\n//         iaa35_pin = ${data.iaa35_pin},\n//         iaa35_arm = ${data.iaa35_arm},\n//         iaa36_bearing = ${data.iaa36_bearing},\n//         iaa36_pin = ${data.iaa36_pin},\n//         iaa36_arm = ${data.iaa36_arm},\n//         iam72_hopper = ${data.iam72_hopper},\n//         iam72_mc_fault = ${data.iam72_mc_fault},\n//         iam73_hopper = ${data.iam73_hopper},\n//         iam73_mc_fault = ${data.iam73_mc_fault},\n//         iam80_hopper = ${data.iam80_hopper},\n//         iam80_mc_fault = ${data.iam80_mc_fault},\n//         ispbr3_arm = ${data.ispbr3_arm},\n//         ispbr3_mc_fault = ${data.ispbr3_mc_fault}\n//     WHERE id = 1\n// `;\n\n\n\n\n\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1930,
+        "y": 700,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "6f61cf9ed16fbbc5",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa35_pin_on",
+        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa35_pin = \"1\";\n    return msg;\n}\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1930,
+        "y": 770,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "1b5ead07cef895b7",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa33_arm_on",
+        "func": "if(msg.payload.action === \"start\"){\n    msg.payload.iaa33_arm = \"1\";\n    return msg;\n}\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1935,
+        "y": 935,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "741d0cb9cc77baed",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa33_roller_on",
+        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa33_roller = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1935,
+        "y": 1005,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "8746fe3011deedec",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa33_pin_on",
+        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa33_pin = \"1\";\n    return msg;\n}\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1935,
+        "y": 1075,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "a5c2bd74801a17b0",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam73_hopper_on",
+        "func": "if(msg.payload.action == 'start'){\n    msg.payload.iam73_hopper = \"1\";\n    return msg;\n}\n\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 1970,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "d97cabc8eec484cd",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam72_hopper_on",
+        "func": "if(msg.payload.action == 'start'){\n    msg.payload.iam72_hopper = \"1\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 2165,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "7b2e29f3b1cbffae",
+        "type": "debug",
+        "z": "24034456db30f6e3",
+        "name": "debug 78",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1185,
+        "y": 825,
+        "wires": []
+    },
+    {
+        "id": "88b68c5f1d7ec675",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "Generate Random Data",
+        "func": "\n\n\n\n// Kondisi untuk iaa33_arm\nif (msg.payload.iaa33_arm == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_arm = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa33_arm == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_arm = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n// Kondisi untuk iaa33_pin\nif (msg.payload.iaa33_pin == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_pin = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa33_pin == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_pin = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n// Kondisi untuk iaa33_roller\nif (msg.payload.iaa33_roller == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_bearing = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa33_roller == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa33_bearing = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n\n\n\n\n\n\n\n\n\n\n// Kondisi untuk iaa35_arm\nif (msg.payload.iaa35_arm == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa35_arm = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa35_arm == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa35_arm = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n// Kondisi untuk iaa35_pin\nif (msg.payload.iaa35_pin == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa35_pin = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa35_pin == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa35_pin = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n// Kondisi untuk iaa35_roller\nif (msg.payload.iaa35_roller == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa35_bearing = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iaa35_roller == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iaa35_bearing = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n\n\n\n\n\n\n\n\n\n// Kondisi untuk iam73_mc_fault\nif (msg.payload.iam73_mc_fault == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam73_mc_fault = 1\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iam73_mc_fault == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam73_mc_fault = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n// Kondisi untuk iam73_hopper\nif (msg.payload.iam73_hopper == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam73_hopper = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iam73_hopper == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam73_hopper = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n\n\n\n\n\n\n\n// Kondisi untuk iam72_mc_fault\nif (msg.payload.iam72_mc_fault == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam72_mc_fault = 1\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iam72_mc_fault == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam72_mc_fault = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n// Kondisi untuk iam72_hopper\nif (msg.payload.iam72_hopper == \"1\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam72_hopper = 0\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\nif (msg.payload.iam72_hopper == \"0\") {\n    var query = `\n    UPDATE table_condition_andon\n    SET iam72_hopper = 2\n    WHERE id = 1\n    `;\n    msg.topic = query;\n    return msg;\n}\n\n\n\n\n\n\n\n\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2270,
+        "y": 1345,
+        "wires": [
+            [
+                "3907649e4f54e539",
+                "1fda8458f11850f2"
+            ]
+        ]
+    },
+    {
+        "id": "cb984a3e3063c03e",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam73_mc_fault_on",
+        "func": "if(msg.payload.action == 'start'){\n    msg.payload.iam73_mc_fault = \"1\";\n    return msg;\n}\n\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 1900,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "a307b9a8b05566b3",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam72_mc_fault_on",
+        "func": "if(msg.payload.action == 'start'){\n    msg.payload.iam72_mc_fault = \"1\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 2095,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "ea682a398cf883e3"
+            ]
+        ]
+    },
+    {
+        "id": "9ad1361942a92a68",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam73_mc_fault_off",
+        "func": "if(msg.payload.action == 'stop'){\n    msg.payload.iam73_mc_fault = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 1935,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "803087a08a7e0291",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam73_hopper_off",
+        "func": "if(msg.payload.action == 'stop'){\n    msg.payload.iam73_hopper = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 2005,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "9fb992a21be7f3d9",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam72_mc_fault_off",
+        "func": "if(msg.payload.action == 'stop'){\n    msg.payload.iam72_mc_fault = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 2130,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "da454441eba4afd7",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iam72_hopper_off",
+        "func": "if(msg.payload.action == 'stop'){\n    msg.payload.iam72_hopper = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 2200,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "ba2681166e357ee5",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa35_arm_off",
+        "func": "if(msg.payload.action == \"stop\"){\n    msg.payload.iaa35_arm = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1930,
+        "y": 665,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "b0c518f8c8bffb0f",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "ab8e9987473d1ce7",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa35_roller_off",
+        "func": "if(msg.payload.action == \"stop\"){\n    msg.payload.iaa35_roller = \"0\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1930,
+        "y": 735,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "c16f3456b1c705c8",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa35_pin_off",
+        "func": "if (msg.payload.action == \"stop\") {\n    msg.payload.iaa35_pin = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1930,
+        "y": 805,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "362ee770344d7fae",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa33_arm_off",
+        "func": "if(msg.payload.action === \"stop\"){\n    msg.payload.iaa33_arm = \"0\";\n    return msg;\n}\n\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1935,
+        "y": 970,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "d2fbf90b6b5fddff",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa33_roller_off",
+        "func": "if(msg.payload.action == \"stop\"){\n    msg.payload.iaa33_roller = \"0\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1935,
+        "y": 1040,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "e38184c2c17a80f3",
+        "type": "function",
+        "z": "24034456db30f6e3",
+        "name": "iaa33_pin_off",
+        "func": "if(msg.payload.action == \"stop\"){\n    msg.payload.iaa33_pin = \"0\";\n    return msg;\n}\nelse {\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1935,
+        "y": 1110,
+        "wires": [
+            [
+                "88b68c5f1d7ec675",
+                "e49480a37b8130d1"
+            ]
+        ]
+    },
+    {
+        "id": "1fda8458f11850f2",
+        "type": "debug",
+        "z": "24034456db30f6e3",
+        "name": "debug 79",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2795,
+        "y": 1245,
+        "wires": []
+    },
+    {
+        "id": "79810df2ee3729c1",
         "type": "inject",
-        "z": "8e30d240404d539c",
+        "z": "24034456db30f6e3",
         "name": "MANUAL OFF",
         "props": [
             {
@@ -2737,1112 +3255,51 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 2815,
-        "y": 1785,
+        "x": 2565,
+        "y": 1610,
         "wires": [
             [
-                "5bf645df2ca0d56f"
+                "93551421394d8435"
             ]
         ]
     },
     {
-        "id": "f8d39934efd55636",
+        "id": "e49480a37b8130d1",
         "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iaa35_arm",
-        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa35_arm = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
+        "z": "24034456db30f6e3",
+        "name": "OR Gate OFF",
+        "func": "if ( msg.payload.iaa33_pin == \"0\" || msg.payload.iaa33_roller == \"0\" || msg.payload.iaa33_arm == \"0\" || msg.payload.iaa35_pin == \"0\" || msg.payload.iaa35_roller == \"0\" || msg.payload.iaa35_arm == \"0\" || msg.payload.iam72_hopper == \"0\" || msg.payload.iam73_hopper == \"0\") {\n    msg.payload = \"1\";\n} else {\n    msg.payload = 'aman!!!';\n}\nreturn msg;\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2525,
-        "y": 705,
+        "x": 2645,
+        "y": 1685,
         "wires": [
             [
-                "9510df5a22099961"
+                "b0c518f8c8bffb0f"
             ]
         ]
     },
     {
-        "id": "81aeef868296952e",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iaa35_roller",
-        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa35_roller = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2525,
-        "y": 755,
-        "wires": [
-            [
-                "9510df5a22099961"
-            ]
-        ]
-    },
-    {
-        "id": "0a9c7670589c2cc0",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iaa35_pin",
-        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa35_pin = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2520,
-        "y": 800,
-        "wires": [
-            [
-                "9510df5a22099961"
-            ]
-        ]
-    },
-    {
-        "id": "7e1cd272a8815d42",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iaa33_arm",
-        "func": "if(msg.payload.action === \"start\"){\n    msg.payload.iaa33_arm = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2530,
-        "y": 940,
-        "wires": [
-            [
-                "5f22fe04ab2f7f88",
-                "23e19b9307076086"
-            ]
-        ]
-    },
-    {
-        "id": "ac26836b1e609758",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iaa33_roller",
-        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa33_roller = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2530,
-        "y": 990,
-        "wires": [
-            [
-                "5f22fe04ab2f7f88"
-            ]
-        ]
-    },
-    {
-        "id": "21feb873945f398e",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iaa33_pin",
-        "func": "if(msg.payload.action == \"start\"){\n    msg.payload.iaa33_pin = \"1\";\n    return msg;\n}\n\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2525,
-        "y": 1040,
-        "wires": [
-            [
-                "5f22fe04ab2f7f88"
-            ]
-        ]
-    },
-    {
-        "id": "c3e7e344684c3796",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iam73_hopper",
-        "func": "if(msg.payload.action == 'start'){\n    msg.payload.iam73_hopper = '1';\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2550,
-        "y": 1230,
-        "wires": [
-            [
-                "7cdb665c83168251"
-            ]
-        ]
-    },
-    {
-        "id": "cabddd7bd6de87fc",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "iam72_hopper",
-        "func": "if(msg.payload.action == \"1\"){\n    msg.payload.iam72_hopper = \"1\";\n    return msg;\n}\n\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2525,
-        "y": 2075,
-        "wires": [
-            [
-                "b1a1cb4b91560830"
-            ]
-        ]
-    },
-    {
-        "id": "92a0ee84aca6307e",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 76",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 3020,
-        "y": 1155,
-        "wires": []
-    },
-    {
-        "id": "5f22fe04ab2f7f88",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "IAA33 ON",
-        "func": "if (msg.payload.iaa33_arm == '1' || msg.payload.iaa33_roller == '1' || msg.payload.iaa35_pin == '1') {\n    msg.payload.b = '1';\n}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2880,
-        "y": 1315,
-        "wires": [
-            [
-                "4c8114ff75f0d65f"
-            ]
-        ]
-    },
-    {
-        "id": "9510df5a22099961",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "IAA35 ON",
-        "func": "if(msg.payload.iaa35_arm === '1' || msg.payload.iaa35_roller === '1' || msg.payload.iaa35_pin === '1'){\n    msg.payload.a = '1';\n}\nreturn msg;\n\n\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2880,
-        "y": 1275,
-        "wires": [
-            [
-                "4c8114ff75f0d65f",
-                "92a0ee84aca6307e"
-            ]
-        ]
-    },
-    {
-        "id": "b1a1cb4b91560830",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "IAM72 ON",
-        "func": "if (msg.payload.iam72_hopper == '1') {\n    msg.payload.d = '1';\n}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2890,
-        "y": 1395,
-        "wires": [
-            [
-                "4c8114ff75f0d65f"
-            ]
-        ]
-    },
-    {
-        "id": "7cdb665c83168251",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "IAM73 ON",
-        "func": "if(msg.payload.iam73_hopper == '1'){\n    msg.payload.c = '1';\n}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2890,
-        "y": 1355,
-        "wires": [
-            [
-                "4c8114ff75f0d65f"
-            ]
-        ]
-    },
-    {
-        "id": "318ee568c6171ec0",
-        "type": "http in",
-        "z": "8e30d240404d539c",
+        "id": "061b3c9fcc444f57",
+        "type": "mysql",
+        "z": "24034456db30f6e3",
+        "mydb": "90f875a253a55c6f",
         "name": "",
-        "url": "/iaa33_arm",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2400,
-        "y": 410,
+        "x": 3250,
+        "y": 1375,
         "wires": [
-            [
-                "aed3e2f5ad4dc6a3"
-            ]
+            []
         ]
     },
     {
-        "id": "f2a4a68c9004407f",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 2785,
-        "y": 410,
-        "wires": []
-    },
-    {
-        "id": "aed3e2f5ad4dc6a3",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa33_arm.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 2605,
-        "y": 410,
-        "wires": [
-            [
-                "f2a4a68c9004407f"
-            ]
-        ]
-    },
-    {
-        "id": "23e19b9307076086",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 77",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 2745,
-        "y": 860,
-        "wires": []
-    },
-    {
-        "id": "0c83bb80d8322ce9",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 78",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1225,
-        "y": 840,
-        "wires": []
-    },
-    {
-        "id": "f98c8ff574bc8f95",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 1",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1820,
-        "y": 870,
-        "wires": []
-    },
-    {
-        "id": "949b1e4a3a993fad",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa33_arm.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 1615,
-        "y": 870,
-        "wires": [
-            [
-                "f98c8ff574bc8f95"
-            ]
-        ]
-    },
-    {
-        "id": "e493cdc539676b41",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Arm: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n\n\n\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1415,
-        "y": 870,
-        "wires": [
-            [
-                "949b1e4a3a993fad"
-            ]
-        ]
-    },
-    {
-        "id": "6c738004a6a2ce25",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Bearing: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1420,
-        "y": 915,
-        "wires": [
-            [
-                "4e687c2f95dbb867"
-            ]
-        ]
-    },
-    {
-        "id": "4e687c2f95dbb867",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa33_bearing.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 1630,
-        "y": 915,
-        "wires": [
-            [
-                "5d7f708d9ab1f579"
-            ]
-        ]
-    },
-    {
-        "id": "5d7f708d9ab1f579",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 79",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1825,
-        "y": 915,
-        "wires": []
-    },
-    {
-        "id": "08b952601f210e90",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iaa33_bearing",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2410,
-        "y": 450,
-        "wires": [
-            [
-                "3ece23fd713876af"
-            ]
-        ]
-    },
-    {
-        "id": "3ece23fd713876af",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa33_bearing.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 2615,
-        "y": 450,
-        "wires": [
-            [
-                "899dc0be04a5990f"
-            ]
-        ]
-    },
-    {
-        "id": "899dc0be04a5990f",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 2785,
-        "y": 450,
-        "wires": []
-    },
-    {
-        "id": "7b8dd0a1ddc4149a",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Pin: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1420,
-        "y": 960,
-        "wires": [
-            [
-                "34c89675cc3bc947"
-            ]
-        ]
-    },
-    {
-        "id": "34c89675cc3bc947",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa33_pin.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 1610,
-        "y": 960,
-        "wires": [
-            [
-                "88a10b1ebb391756"
-            ]
-        ]
-    },
-    {
-        "id": "88a10b1ebb391756",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 80",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1825,
-        "y": 960,
-        "wires": []
-    },
-    {
-        "id": "07703f6d4b188184",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iaa33_pin",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2400,
-        "y": 490,
-        "wires": [
-            [
-                "347f2bb5ad6fb242"
-            ]
-        ]
-    },
-    {
-        "id": "347f2bb5ad6fb242",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa33_pin.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 2595,
-        "y": 490,
-        "wires": [
-            [
-                "3fad552b089fcd88"
-            ]
-        ]
-    },
-    {
-        "id": "3fad552b089fcd88",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 2785,
-        "y": 490,
-        "wires": []
-    },
-    {
-        "id": "d426daab2571c004",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 81",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1825,
-        "y": 155,
-        "wires": []
-    },
-    {
-        "id": "4d023919936aa5f1",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa35_arm.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 1620,
-        "y": 155,
-        "wires": [
-            [
-                "d426daab2571c004"
-            ]
-        ]
-    },
-    {
-        "id": "da6d3127178c99d7",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Arm: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n\n\n\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1420,
-        "y": 155,
-        "wires": [
-            [
-                "4d023919936aa5f1"
-            ]
-        ]
-    },
-    {
-        "id": "61ce3c15f20db348",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Bearing: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1425,
-        "y": 200,
-        "wires": [
-            [
-                "6420eddede27f411"
-            ]
-        ]
-    },
-    {
-        "id": "6420eddede27f411",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa35_bearing.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 1635,
-        "y": 200,
-        "wires": [
-            [
-                "8b76ad0122df5ee2"
-            ]
-        ]
-    },
-    {
-        "id": "8b76ad0122df5ee2",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 82",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1830,
-        "y": 200,
-        "wires": []
-    },
-    {
-        "id": "a4622ac059e002a8",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Pin: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1425,
-        "y": 245,
-        "wires": [
-            [
-                "33ef531e50e77070"
-            ]
-        ]
-    },
-    {
-        "id": "33ef531e50e77070",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa35_pin.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 1615,
-        "y": 245,
-        "wires": [
-            [
-                "cac6aadd64199cfe"
-            ]
-        ]
-    },
-    {
-        "id": "cac6aadd64199cfe",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 83",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1830,
-        "y": 245,
-        "wires": []
-    },
-    {
-        "id": "92b9f06161134b31",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iaa35_arm",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2400,
-        "y": 270,
-        "wires": [
-            [
-                "373f28f4428b3e3c"
-            ]
-        ]
-    },
-    {
-        "id": "792e750f0de8aaf9",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 2785,
-        "y": 270,
-        "wires": []
-    },
-    {
-        "id": "373f28f4428b3e3c",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa35_arm.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 2605,
-        "y": 270,
-        "wires": [
-            [
-                "792e750f0de8aaf9"
-            ]
-        ]
-    },
-    {
-        "id": "334877c7cc67ef5b",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iaa35_bearing",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2410,
-        "y": 310,
-        "wires": [
-            [
-                "2a48f3a27baa56e3"
-            ]
-        ]
-    },
-    {
-        "id": "2a48f3a27baa56e3",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa35_bearing.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 2615,
-        "y": 310,
-        "wires": [
-            [
-                "25a9c3bfeb692939"
-            ]
-        ]
-    },
-    {
-        "id": "25a9c3bfeb692939",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 2785,
-        "y": 310,
-        "wires": []
-    },
-    {
-        "id": "868b6efedf455f65",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iaa35_pin",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2400,
-        "y": 350,
-        "wires": [
-            [
-                "8dbb171769aa8c8b"
-            ]
-        ]
-    },
-    {
-        "id": "8dbb171769aa8c8b",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iaa35_pin.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 2595,
-        "y": 350,
-        "wires": [
-            [
-                "69b1d6c1431dad26"
-            ]
-        ]
-    },
-    {
-        "id": "69b1d6c1431dad26",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 2785,
-        "y": 350,
-        "wires": []
-    },
-    {
-        "id": "a093637ab69e326d",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 84",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 2270,
-        "y": 1875,
-        "wires": []
-    },
-    {
-        "id": "cdafb99bdb2f5343",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iam73_hopper.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 2075,
-        "y": 1875,
-        "wires": [
-            [
-                "a093637ab69e326d"
-            ]
-        ]
-    },
-    {
-        "id": "45d61ea24817a862",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Hopper: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n\n\n\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1865,
-        "y": 1875,
-        "wires": [
-            [
-                "cdafb99bdb2f5343"
-            ]
-        ]
-    },
-    {
-        "id": "984f5545efa11d47",
-        "type": "function",
-        "z": "8e30d240404d539c",
-        "name": "Generate Payload",
-        "func": "if (msg.payload.action === 'start') {\n    msg.payload = {\n        Supply_Hopper: 1,\n        key2: \"\"\n    };\n    return msg;\n}if(msg.payload.action === 'stop'){\n        msg.payload = {\n        _: 0,\n        key2: \"\"\n    };\n    return msg;\n}\nelse {\n    // Tidak melakukan apapun jika data_condition tidak sama dengan \"signal\"\n    return null;\n}\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1870,
-        "y": 1920,
-        "wires": [
-            [
-                "f6c6adae229e16ce"
-            ]
-        ]
-    },
-    {
-        "id": "f6c6adae229e16ce",
-        "type": "file",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iam72_hopper.txt",
-        "filenameType": "str",
-        "appendNewline": false,
-        "createDir": false,
-        "overwriteFile": "true",
-        "encoding": "none",
-        "x": 2080,
-        "y": 1920,
-        "wires": [
-            [
-                "ec9e89179e8d05f1"
-            ]
-        ]
-    },
-    {
-        "id": "ec9e89179e8d05f1",
-        "type": "debug",
-        "z": "8e30d240404d539c",
-        "name": "debug 85",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 2275,
-        "y": 1920,
-        "wires": []
-    },
-    {
-        "id": "29bfb496c18011b1",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iam_72_hopper",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2990,
-        "y": 415,
-        "wires": [
-            [
-                "d69fe3aa6738a88a"
-            ]
-        ]
-    },
-    {
-        "id": "eccb49e36c1e3204",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 3380,
-        "y": 415,
-        "wires": []
-    },
-    {
-        "id": "d69fe3aa6738a88a",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iam72_hopper.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 3210,
-        "y": 415,
-        "wires": [
-            [
-                "eccb49e36c1e3204"
-            ]
-        ]
-    },
-    {
-        "id": "bda7aaa881bdee5c",
-        "type": "http in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "url": "/iam_73_hopper",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 2990,
-        "y": 455,
-        "wires": [
-            [
-                "eba63c35d59dc645"
-            ]
-        ]
-    },
-    {
-        "id": "eba63c35d59dc645",
-        "type": "file in",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "filename": "iam73_hopper.txt",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 3210,
-        "y": 455,
-        "wires": [
-            [
-                "42b3f4975957ac11"
-            ]
-        ]
-    },
-    {
-        "id": "42b3f4975957ac11",
-        "type": "http response",
-        "z": "8e30d240404d539c",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 3380,
-        "y": 455,
-        "wires": []
-    },
-    {
-        "id": "ddb39cf2d3da96b2",
+        "id": "4a3ca22424113665",
         "type": "serial-port",
-        "serialport": "COM4",
+        "name": "",
+        "serialport": "/dev/ttyUSB0",
         "serialbaud": "9600",
         "databits": "8",
         "parity": "none",
@@ -3863,38 +3320,48 @@
         "type": "MySQLdatabase",
         "name": "",
         "host": "127.0.0.1",
-        "port": "3307",
-        "db": "database_tps_energy",
+        "port": "3306",
+        "db": "database_tps_oee_iaa_35",
         "tz": "",
         "charset": "UTF8"
     },
     {
-        "id": "7411ac616e5fc7a3",
+        "id": "787813855a4f46ed",
         "type": "MySQLdatabase",
         "name": "",
         "host": "127.0.0.1",
-        "port": "3307",
+        "port": "3306",
         "db": "database_tps_oee_iaa_33",
         "tz": "",
         "charset": "UTF8"
     },
     {
-        "id": "c3711faee88c2c59",
+        "id": "7dcb3745c1f6d11e",
         "type": "MySQLdatabase",
         "name": "database_tps_oee_iam_73",
         "host": "127.0.0.1",
-        "port": "3307",
+        "port": "3306",
         "db": "database_tps_oee_iam_73",
         "tz": "",
         "charset": "UTF8"
     },
     {
-        "id": "5f365ca3030d2193",
+        "id": "51e6297883dcba65",
         "type": "MySQLdatabase",
         "name": "",
         "host": "127.0.0.1",
-        "port": "3307",
+        "port": "3306",
         "db": "database_tps_oee_iam_72",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "90f875a253a55c6f",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "database_tps_oee_roller_arm",
         "tz": "",
         "charset": "UTF8"
     }
