@@ -70,13 +70,13 @@ Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 void setup() {
   mySerialLora.begin(9600);
-  pinMode(buttonPinA2, INPUT_PULLUP);
-  pinMode(buttonPinA3, INPUT_PULLUP);
-  pinMode(buttonPinA4, INPUT_PULLUP);
-  pinMode(buttonPinA5, INPUT_PULLUP);
-  pinMode(buttonPinA13, INPUT_PULLUP);
-  pinMode(buttonPinA14, INPUT_PULLUP);
-  pinMode(buttonPinA15, INPUT_PULLUP);
+  pinMode(buttonPinA2, INPUT);
+  pinMode(buttonPinA3, INPUT);
+  pinMode(buttonPinA4, INPUT);
+  pinMode(buttonPinA5, INPUT);
+  pinMode(buttonPinA13, INPUT);
+  pinMode(buttonPinA14, INPUT);
+  pinMode(buttonPinA15, INPUT);
 
 
 
