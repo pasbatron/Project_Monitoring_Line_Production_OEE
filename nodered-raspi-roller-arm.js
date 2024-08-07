@@ -1,5 +1,13 @@
 [
     {
+        "id": "24034456db30f6e3",
+        "type": "tab",
+        "label": "Core_OEE",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "9d38e8986ae1c85e",
         "type": "function",
         "z": "24034456db30f6e3",
@@ -937,7 +945,7 @@
         "type": "debug",
         "z": "24034456db30f6e3",
         "name": "debug 75",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
