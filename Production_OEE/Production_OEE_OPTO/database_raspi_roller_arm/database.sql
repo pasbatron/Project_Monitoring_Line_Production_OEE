@@ -1,0 +1,22 @@
+CREATE TABLE table_condition_andon (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    iaa33_bearing INT(5) DEFAULT NULL,
+    iaa33_pin INT(5) DEFAULT NULL,
+    iaa33_arm INT(5) DEFAULT NULL,
+    iaa35_bearing INT(5) DEFAULT NULL,
+    iaa35_pin INT(5) DEFAULT NULL,
+    iaa35_arm INT(5) DEFAULT NULL,
+    iaa36_bearing INT(5) DEFAULT NULL,
+    iaa36_pin INT(5) DEFAULT NULL,
+    iaa36_arm INT(5) DEFAULT NULL,
+    iam72_hopper INT(5) DEFAULT NULL,
+    iam72_mc_fault INT(5) DEFAULT NULL,
+    iam73_hopper INT(5) DEFAULT NULL,
+    iam73_mc_fault INT(5) DEFAULT NULL,
+    iam80_hopper INT(5) DEFAULT NULL,
+    iam80_mc_fault INT(5) DEFAULT NULL,
+    ispbr3_arm_nr INT(5) DEFAULT NULL,
+    ispbr3_arm_d31e INT(5) DEFAULT NULL,
+    ispbr3_mc_fault INT(5) NOT NULL,
+    PRIMARY KEY (id)
+);
